@@ -99,7 +99,7 @@ export default {
     resister() {
       const userRef = firebase.firestore().collection("users");
 
-      let context = {
+      let inputData = {
         accountName: this.accountName,
         userName: this.userName
       };
@@ -120,7 +120,7 @@ export default {
         .then(imageUrl => {
           userRef
             .doc(this.uid)
-            .set({ ...context, imageUrl })
+            .set({ ...inputData, imageUrl })
             .then(() => {
               console.log("Document successfully written!");
               this.$router.push("/");
