@@ -27,7 +27,6 @@
 <script>
 import "bulma/css/bulma.css";
 import firebase from "firebase";
-import TheHeader from "../components/TheHeader";
 import InputArea from "../components/InputArea";
 
 export default {
