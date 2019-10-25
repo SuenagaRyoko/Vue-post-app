@@ -134,7 +134,6 @@ export default {
     }
   },
   components: {
-    TheHeader,
     InputArea
   }
 };
