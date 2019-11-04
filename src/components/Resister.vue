@@ -1,7 +1,6 @@
 <template>
   <div class="resister container is-fluid mw-980">
     <h2>ユーザー情報登録</h2>
-    <p v-if="idError" class="help is-danger">{{ idError }}</p>
     <div class="field">
       <p class="control">
         <input
@@ -9,20 +8,26 @@
           type="text"
           placeholder="Account name"
           v-model="accountName"
-          @change="idExists"
+          @change="idExists(); accountNameEntered()"
         >
       </p>
     </div>
     <div class="field">
       <p class="control">
-        <input class="input" type="text" placeholder="User name" v-model="userName">
+        <input
+          class="input"
+          type="text"
+          placeholder="User name"
+          v-model="userName"
+          @change="userNameEntered()"
+        >
       </p>
     </div>
     <div class="field">
       <div class="control">
         <div class="file">
           <label class="file-label">
-            <input class="file-input" type="file" name="resume" @change.prevent="selectFile">
+            <input class="file-input" type="file" @change.prevent="uploadFile">
             <span class="file-cta">
               <span class="file-label">サムネイルを選択…</span>
             </span>
@@ -30,10 +35,9 @@
         </div>
       </div>
     </div>
-    <p v-if="resisterError" class="help is-danger">{{ resisterError }}</p>
     <div class="field">
       <p class="control">
-        <button class="button" @click="resister">登録</button>
+        <button class="button" @click="isValid">登録</button>
       </p>
     </div>
   </div>
@@ -51,7 +55,17 @@ export default {
       imageName: "",
       imageUrl: "",
       imageFile: "",
-      idError: ""
+      isAccountNameFocused: false,
+      validate: { 
+        required: [
+            { accountName: false },
+            { userName: false },
+            { image: false }
+        ],
+        unique: [
+            { accountName: false }
+        ]
+      }
     };
   },
   created() {
@@ -64,37 +78,94 @@ export default {
     });
   },
   methods: {
+    accountNameEntered() {
+      if (this.accountName) {
+        this.validate.required[0].accountName = true;
+      } else {
+        this.validate.required[0].accountName = false;
+      }
+    },
+    userNameEntered() {
+      if (this.userName) {
+        this.validate.required[1].userName = true;
+      } else {
+        this.validate.required[1].userName = false;
+      }
+    },
     idExists() {
+      this.isAccountNameFocused = true;
       const userRef = firebase.firestore().collection("users");
 
       userRef
         .where("accountName", "==", this.accountName)
         .get()
         .then(docs => {
-          docs.forEach(doc => {
-            if (doc.exists) {
-              this.idError = "このアカウント名は既に存在しています";
-            } else {
-              console.log("No such document!");
-            }
-          });
+          if (docs.size) {
+            console.log(this.validate.unique[0].accountName);
+            this.validate.unique[0].accountName = false;
+            this.isAccountNameFocused = false;
+          } else {
+            this.validate.unique[0].accountName = true;
+            console.log("this accountName is unique!");
+            console.log(this.validate.unique[0].accountName);
+            this.isAccountNameFocused = false;
+          }
         })
         .catch(error => {
-          console.log("Error getting document:", error);
+          throw error;
         });
     },
-    selectFile(e) {
+    uploadFile(e) {
       let files = e.target.files;
-
-      this.imageName = files[0].name;
-
       const fr = new FileReader();
 
       fr.readAsDataURL(files[0]);
       fr.addEventListener("load", () => {
-        this.imageUrl = fr.result;
-        this.imageFile = files[0];
+        if (files[0]) {
+          if (files[0].name.match(/.(jpg|jpeg|png|gif)$/i)) {
+            this.imageFile = files[0];
+            this.imageName = files[0].name;
+            console.log(`uploaded image! => ${this.imageName}`);
+            this.validate.required[2].imageRequire = true;
+          }
+        }
+        this.validate.required[2].imageRequire = false;
       });
+    },
+    isValid() {
+      if (this.isAccountNameFocused) {
+        console.log("AccountNameFocused");
+        return;
+      }
+      let isRequired = this.validate.required.some((rule) => {
+        for (let inputItem in rule) {
+          if (!rule.hasOwnProperty(inputItem)) {
+            return false;
+          }
+          if (!rule[inputItem]) {
+            return false;
+          }
+        }
+        return rule;
+      });
+      console.log(`isRequired:${isRequired}`);
+      
+      let isUnique = this.validate.unique.some((rule) => {
+        for (let inputItem in rule) {
+          if (!rule.hasOwnProperty(inputItem)) {
+            return false;
+          }
+          if (!rule[inputItem]) {
+            return false;
+          }
+        }
+        return rule;
+      });
+      console.log(`isUnique:${isUnique}`);
+      
+      if (isRequired && isUnique) {
+        this.resister();
+      }
     },
     resister() {
       const userRef = firebase.firestore().collection("users");
@@ -126,7 +197,7 @@ export default {
               this.$router.push("/");
             })
             .catch(error => {
-              console.error("Error writing document: ", error);
+              throw error;
             });
         });
     }
