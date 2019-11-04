@@ -28,6 +28,7 @@ export default {
     postMsg() {
       this.$emit("send-post", this.msg);
       this.showBtn = false;
+      this.msg = "";
     },
     showForm() {
       this.showBtn = true;
