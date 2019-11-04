@@ -7,14 +7,14 @@ Vue.config.productionTip = false;
 
 // Initialize Firebase
 var config = {
-  apiKey: "AIzaSyB3uADgRQKt-t0aaQW8RhjGUVQ1EzCItpw",
-  authDomain: "post-app-3e7ff.firebaseapp.com",
-  databaseURL: "https://post-app-3e7ff.firebaseio.com",
-  projectId: "post-app-3e7ff",
-  storageBucket: "post-app-3e7ff.appspot.com",
-  messagingSenderId: "264718445679",
-  appId: "1:264718445679:web:424dc5fe9e124118e2b19a",
-  measurementId: "G-YZXZJZEGW3"
+  apiKey: "AIzaSyDy2Z7byDm6G7YXqj_idJ1uTGBlYn4HDP8",
+  authDomain: "post-cfca2.firebaseapp.com",
+  databaseURL: "https://post-cfca2.firebaseio.com",
+  projectId: "post-cfca2",
+  storageBucket: "post-cfca2.appspot.com",
+  messagingSenderId: "175507536464",
+  appId: "1:175507536464:web:19940500272829f5ea6f55",
+  measurementId: "G-HL6NLCJ96D"
 };
 firebase.initializeApp(config);
 

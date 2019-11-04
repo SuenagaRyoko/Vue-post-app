@@ -14,10 +14,11 @@
     <div class="field">
       <p class="control">
         <button class="button is-success" @click="signup">
-          Login
+          登録
         </button>
       </p>
     </div>
+    <router-link to="/signin">ログイン</router-link>
   </div>
 </template>
 <script>

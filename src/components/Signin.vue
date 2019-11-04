@@ -23,10 +23,11 @@
     <div class="field">
       <p class="control">
          <button class="button is-success" @click="login">
-           Login
+           ログイン
          </button>
       </p>
     </div>
+    <router-link to="/signup">アカウントを登録</router-link>
   </div>
 </template>
 <script>
@@ -47,11 +48,14 @@ export default {
         .signInWithEmailAndPassword(this.email, this.password)
       isLogin
         .then((user) => {
-          console.log(user.user.uid);
-          this.$router.push('/')
+          if (user) {
+            this.$router.push('/')
+          }else{
+            return
+          }
         })
         .catch((error) => {
-          alert(error)
+          throw error;
         })
     }
   }

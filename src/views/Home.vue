@@ -64,7 +64,7 @@ export default {
           }
         })
         .catch(error => {
-          console.log("Error getting document:", error);
+          throw error;
         });
     },
     getPosts() {
@@ -76,7 +76,7 @@ export default {
           let docs = [];
           let querys = [];
           querySnapshot.forEach(doc => {
-            console.log(doc.id, " => ", doc.data().createdAt.toDate());
+            // console.log(doc.id, " => ", doc.data().createdAt.toDate());
             querys.push(
               firebase
                 .firestore()
@@ -104,10 +104,10 @@ export default {
           );
 
           users.then(() => {
-            console.log("users", docs);
+            // console.log("users", docs);
           });
           users.catch(error => {
-            console.log(error);
+            throw error;
           });
 
           return docs;
@@ -117,7 +117,7 @@ export default {
         });
     },
     sendPost(msg) {
-      console.log(msg);
+      // console.log(msg);
       const postRef = firebase.firestore().collection("posts");
       postRef
         .add({
@@ -129,12 +129,11 @@ export default {
           console.log("Document written with ID: ", docRef.id);
         })
         .catch(error => {
-          console.error("Error adding document: ", error);
+          throw error;
         });
     }
   },
   components: {
-    TheHeader,
     InputArea
   }
 };
