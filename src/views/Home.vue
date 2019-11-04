@@ -45,7 +45,7 @@ export default {
       } else {
         this.uid = user.uid;
         this.setCurrentUser();
-        this.getPosts();
+        this.fetchPosts();
       }
     });
   },
@@ -67,16 +67,15 @@ export default {
           throw error;
         });
     },
-    getPosts() {
+    fetchPosts() {
       const postRef = firebase.firestore().collection("posts");
       postRef
         .orderBy("createdAt", "desc")
-        .get()
-        .then(querySnapshot => {
+        // .limit(10)
+        .onSnapshot((querySnapshot) => {
           let docs = [];
           let querys = [];
           querySnapshot.forEach(doc => {
-            // console.log(doc.id, " => ", doc.data().createdAt.toDate());
             querys.push(
               firebase
                 .firestore()
@@ -104,20 +103,14 @@ export default {
           );
 
           users.then(() => {
-            // console.log("users", docs);
+            this.posts = docs;
           });
           users.catch(error => {
             throw error;
           });
-
-          return docs;
         })
-        .then(docs => {
-          this.posts = docs;
-        });
     },
     sendPost(msg) {
-      // console.log(msg);
       const postRef = firebase.firestore().collection("posts");
       postRef
         .add({
