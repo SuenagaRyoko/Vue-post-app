@@ -11,6 +11,8 @@
           @change="idExists(); accountNameEntered()"
         >
       </p>
+      <p v-if="!validate.required[0].accountName" class="help is-danger text-align-l">アカウント名を入力してください</p>
+      <p v-if="!validate.unique[0].accountName" class="help is-danger text-align-l">そのアカウントは使用できません</p>
     </div>
     <div class="field">
       <p class="control">
@@ -22,18 +24,27 @@
           @change="userNameEntered()"
         >
       </p>
+      <p v-if="!validate.required[1].userName" class="help is-danger text-align-l">アカウント名を入力してください</p>
     </div>
     <div class="field">
-      <div class="control">
-        <div class="file">
-          <label class="file-label">
-            <input class="file-input" type="file" @change.prevent="uploadFile">
-            <span class="file-cta">
-              <span class="file-label">サムネイルを選択…</span>
+      <div class="file has-name">
+        <label class="file-label">
+          <input 
+            class="file-input"
+            type="file" name="resume"
+            @change.prevent="uploadFile"
+          >
+          <span class="file-cta">
+            <span class="file-label">
+              サムネイルを選択…
             </span>
-          </label>
-        </div>
+          </span>
+          <span class="file-name">
+            {{ imageName }}
+          </span>
+        </label>
       </div>
+      <p v-if="!validate.required[2].image" class="help is-danger text-align-l">サムネイル画像をアップロードしてください</p>
     </div>
     <div class="field">
       <p class="control">
@@ -52,7 +63,7 @@ export default {
       uid: "",
       accountName: "",
       userName: "",
-      imageName: "",
+      imageName: "画像を選択",
       imageUrl: "",
       imageFile: "",
       isAccountNameFocused: false,
@@ -95,7 +106,10 @@ export default {
     idExists() {
       this.isAccountNameFocused = true;
       const userRef = firebase.firestore().collection("users");
-
+      if (this.accountName === 0 || this.accountName === null || this.accountName === "") {
+        this.validate.unique[0].accountName = false;
+        return;
+      }
       userRef
         .where("accountName", "==", this.accountName)
         .get()
@@ -126,10 +140,14 @@ export default {
             this.imageFile = files[0];
             this.imageName = files[0].name;
             console.log(`uploaded image! => ${this.imageName}`);
-            this.validate.required[2].imageRequire = true;
+            this.validate.required[2].image = true;
+          } else {
+            this.validate.required[2].image = false;
           }
+        } else {
+          this.validate.required[2].image = false;
         }
-        this.validate.required[2].imageRequire = false;
+        
       });
     },
     isValid() {
@@ -208,5 +226,8 @@ export default {
 .mw-980 {
   max-width: 980px;
   margin: auto;
+}
+.text-align-l{
+  text-align: left;
 }
 </style>
