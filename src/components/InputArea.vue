@@ -17,6 +17,10 @@
 import "bulma/css/bulma.css";
 
 export default {
+  props: {
+    accountName: String,
+    postId: String
+  },
   data() {
     return {
       msg: "",
@@ -26,11 +30,14 @@ export default {
   },
   methods: {
     postMsg() {
-      this.$emit("send-post", this.msg);
+      this.$emit("send-post", this.msg, this.postId);
       this.showBtn = false;
       this.msg = "";
     },
     showForm() {
+      if (this.accountName) {
+        this.msg = `@${this.accountName} `;
+      }
       this.showBtn = true;
       this.textareaFocus = true;
     },

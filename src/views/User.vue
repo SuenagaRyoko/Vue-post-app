@@ -1,66 +1,42 @@
 <template>
-  <div class="home mw-980 is-fluid">
-    <nav class="navbar" role="navigation" aria-label="main navigation">
-      <div class="navbar-brand">
-        <a
-          role="button"
-          class="navbar-burger burger"
-          aria-label="menu"
-          aria-expanded="false"
-          data-target="navbarBasicExample"
-          @click="toggleNavbar"
-        >
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-        </a>
-      </div>
-
-      <div id="navbarBasicExample" class="navbar-menu" :class="{'is-open':isOpen}">
-        <div class="navbar-end">
-          <div class="navbar-item">
-            <div class="buttons">
-              <router-Link v-if="!uid" to="/signup" class="button is-primary">
-                <strong>Sign up</strong>
-              </router-Link>
-              <a v-if="uid" class="button is-light" @click="signout">
-                sign out
-              </a>
-              <router-Link v-else to="/signin" class="button is-light">
-                sign in
-              </router-Link>
-            </div>
-          </div>
+  <div class="home container mw-980 is-fluid">
+    
+    <div class="user-image">
+      <figure class="image is-64x64">
+        <img :src="currentPageUser.imageUrl">
+      </figure>
+      <h1>{{ currentPageUser.userName }}</h1>
+    </div>
+    <nav class="level">
+      <div class="level-item has-text-centered">
+        <div>
+          <p class="heading">Tweets</p>
+          <p class="title">{{ posts.length }}</p>
         </div>
       </div>
     </nav>
-    <div class="posts">
-      <router-link :to="'/post/' + post.id" class="box" v-for="post in posts" :key="post.id">
-        <article class="media">
-          <div class="media-left">
-            <router-link :to="'/user/' + post.accountName">
-              <figure class="image is-64x64">
-                <img :src="post.imageUrl" alt="Image">
-              </figure>
-            </router-link>
+    <div class="box" v-for="post in posts" :key="post.id">
+      <article class="media">
+        <div class="media-left">
+          <figure class="image is-64x64">
+            <img :src="post.imageUrl" alt="Image">
+          </figure>
+        </div>
+        <div class="media-content">
+          <div class="content">
+            <p>
+              <strong>{{ post.userName }}</strong><small>{{ `@${post.accountName}` }}</small>
+              <br>
+              {{ post.msg }}
+              <br>
+              <small>{{ post.createdAt.toDate() }}</small>
+            </p>
           </div>
-          <div class="media-content">
-            <div class="content">
-              <p>
-                <strong>{{ post.userName }}</strong><small>{{ `@${post.accountName}` }}</small>
-                <br>
-                {{ post.msg }}
-                <br>
-                <small>{{ post.createdAt.toDate() }}</small>
-              </p>
-            </div>
-          </div>
-        </article>
-      </router-link>
+        </div>
+      </article>
     </div>
 
     <input-area
-      v-if="uid"
       @send-post="sendPost"
       :account-name="null"
       :post-id="null"
@@ -79,18 +55,23 @@ export default {
       userName: "",
       accountName: "",
       posts: [],
-      isOpen: false
+      currentPageUser: {
+        uid: "",
+        userName: "",
+        accountName: "",
+        imageUrl: ""
+      }
     };
   },
   created() {
     firebase.auth().onAuthStateChanged(user => {
       if (!user) {
-        this.uid = "";
+        this.$router.push("/signin");
       } else {
         this.uid = user.uid;
         this.setUser();
+        this.setCurrentPageUser();
       }
-      this.fetchPosts();
     });
   },
   methods: {
@@ -107,22 +88,38 @@ export default {
         console.log(error);
       }
     },
+    async setCurrentPageUser() {
+      const currentUserAccountName = this.$route.path.replace("/user/", "");
+      console.log(currentUserAccountName);
+      try {
+        const userRef = firebase.firestore().collection("users");
+        const currentPageUser = await userRef.where("accountName", "==", currentUserAccountName).get();
+        currentPageUser.forEach((user) => {
+          console.log(user.id);
+          this.currentPageUser["uid"] = user.id;
+          this.currentPageUser["userName"] = user.data().userName;
+          this.currentPageUser["accountName"] = user.data().accountName;
+          this.currentPageUser["imageUrl"] = user.data().imageUrl;
+          this.fetchPosts();
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    },
     fetchPosts() {
       try {
         const postRef = firebase.firestore().collection("posts");
         postRef
-          .where("parentPost", "==", null)
+          .where("userRef", "==", "users/" + this.currentPageUser.uid)
           .orderBy("createdAt", "desc")
           .onSnapshot( async (querySnapshot) => {
             let posts = [];
-            const docs = await querySnapshot.docs.map((doc) => {
+            const docs = querySnapshot.docs.map((doc) => {
               return {
                 id: doc.id,
                 ...doc.data()
               }
             })
-
-            console.log(docs);
 
             let user = [];
             for (let i = 0; i < docs.length; i++) {
@@ -138,7 +135,6 @@ export default {
           });
       } catch (error) {
         console.log(error);
-        
       }
     },
     async fetchUser(ref) {
@@ -172,20 +168,6 @@ export default {
         console.log(error);
       }
     },
-    signout() {
-      firebase.auth().signOut().then(() => {
-        this.uid = "";
-      }).catch(function(error) {
-        console.log(error);
-      });
-    },
-    toggleNavbar() {
-      if (this.isOpen) {
-        this.isOpen = false;
-      }else{
-        this.isOpen = true;
-      }
-    }
   },
   components: {
     InputArea
@@ -200,18 +182,15 @@ export default {
 .home {
   margin-bottom: 160px;
 }
-.posts{
-  margin: 16px;
+.user-image {
+  margin: 16px 0;
 }
-.posts a:hover {
-  box-shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.1), 0 0px 0 1px rgba(10, 10, 10, 0.02);
+.user-image .image{
+  margin: auto;
 }
 .image img {
   width: 64px;
   height: 64px;
   object-fit: cover;
-}
-.is-open{
-  display: block;
 }
 </style>
