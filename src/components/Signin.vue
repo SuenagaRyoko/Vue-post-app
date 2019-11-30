@@ -42,21 +42,18 @@ export default {
     }
   },
   methods: {
-    login() {
-      const isLogin = firebase
-        .auth()
-        .signInWithEmailAndPassword(this.email, this.password)
-      isLogin
-        .then((user) => {
-          if (user) {
-            this.$router.push('/')
-          }else{
-            return
-          }
-        })
-        .catch((error) => {
-          throw error;
-        })
+    async login() {
+      try {
+        const isLogin = await firebase
+          .auth()
+          .signInWithEmailAndPassword(this.email, this.password)
+
+        if (isLogin) {
+          this.$router.push('/')
+        }
+      } catch (error) {
+        console.log(error);
+      }
     }
   }
 }

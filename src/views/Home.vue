@@ -102,7 +102,6 @@ export default {
           this.userName = currentUser.data().userName;
           this.accountName = currentUser.data().accountName;
         }
-        console.log(this.userName,this.accountName);
       } catch (error) {
         console.log(error);
       }
@@ -122,8 +121,6 @@ export default {
               }
             })
 
-            console.log(docs);
-
             let user = [];
             for (let i = 0; i < docs.length; i++) {
               user = await this.fetchUser(docs[i].userRef);
@@ -132,8 +129,7 @@ export default {
                 ...user
               });
             }
-            console.log('posts', posts);
-            
+
             this.posts = posts;
           });
       } catch (error) {

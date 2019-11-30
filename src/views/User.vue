@@ -95,7 +95,6 @@ export default {
         const userRef = firebase.firestore().collection("users");
         const currentPageUser = await userRef.where("accountName", "==", currentUserAccountName).get();
         currentPageUser.forEach((user) => {
-          console.log(user.id);
           this.currentPageUser["uid"] = user.id;
           this.currentPageUser["userName"] = user.data().userName;
           this.currentPageUser["accountName"] = user.data().accountName;

@@ -115,22 +115,20 @@ export default {
         .get()
         .then(docs => {
           if (docs.size) {
-            console.log(this.validate.unique[0].accountName);
             this.validate.unique[0].accountName = false;
             this.isAccountNameFocused = false;
           } else {
             this.validate.unique[0].accountName = true;
             console.log("this accountName is unique!");
-            console.log(this.validate.unique[0].accountName);
             this.isAccountNameFocused = false;
           }
         })
         .catch(error => {
-          throw error;
+          console.log(error);
         });
     },
     uploadFile(e) {
-      let files = e.target.files;
+      const files = e.target.files;
       const fr = new FileReader();
 
       fr.readAsDataURL(files[0]);
@@ -139,7 +137,6 @@ export default {
           if (files[0].name.match(/.(jpg|jpeg|png|gif)$/i)) {
             this.imageFile = files[0];
             this.imageName = files[0].name;
-            console.log(`uploaded image! => ${this.imageName}`);
             this.validate.required[2].image = true;
           } else {
             this.validate.required[2].image = false;
@@ -147,15 +144,13 @@ export default {
         } else {
           this.validate.required[2].image = false;
         }
-        
       });
     },
     isValid() {
       if (this.isAccountNameFocused) {
-        console.log("AccountNameFocused");
         return;
       }
-      let isRequired = this.validate.required.some((rule) => {
+      const isRequired = this.validate.required.some((rule) => {
         for (let inputItem in rule) {
           if (!rule.hasOwnProperty(inputItem)) {
             return false;
@@ -166,9 +161,8 @@ export default {
         }
         return rule;
       });
-      console.log(`isRequired:${isRequired}`);
-      
-      let isUnique = this.validate.unique.some((rule) => {
+
+      const isUnique = this.validate.unique.some((rule) => {
         for (let inputItem in rule) {
           if (!rule.hasOwnProperty(inputItem)) {
             return false;
@@ -179,8 +173,7 @@ export default {
         }
         return rule;
       });
-      console.log(`isUnique:${isUnique}`);
-      
+
       if (isRequired && isUnique) {
         this.resister();
       }
@@ -188,7 +181,7 @@ export default {
     resister() {
       const userRef = firebase.firestore().collection("users");
 
-      let inputData = {
+      const inputData = {
         accountName: this.accountName,
         userName: this.userName
       };
@@ -199,7 +192,7 @@ export default {
         .child(`${this.uid}/thumbnail/${this.imageName}`)
         .put(this.imageFile)
         .then(snapshot => {
-          console.log("Uploaded a blob or file!");
+          console.log("Uploaded file!");
           return snapshot.ref.getDownloadURL();
         })
         .then(downloadURL => {
@@ -215,7 +208,7 @@ export default {
               this.$router.push("/");
             })
             .catch(error => {
-              throw error;
+              console.log(error);
             });
         });
     }

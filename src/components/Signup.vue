@@ -33,17 +33,17 @@ export default {
     }
   },
   methods: {
-    signup() {
-      const createUser = firebase.auth()
-        .createUserWithEmailAndPassword(this.email, this.password)
-        
-        createUser.then((res) => {
-          console.log('Create account: ', res.user.uid)
-          this.$router.push('/resister')
-        })
-        .catch((error) => {
-          console.log(error.message)
-        })
+    async signup() {
+      try {
+         const createUser = await firebase.auth()
+        .createUserWithEmailAndPassword(this.email, this.password);
+
+        if (createUser) {
+          this.$router.push('/resister');
+        }
+      } catch (error) {
+        console.log(error);
+      }
     }
   }
 }

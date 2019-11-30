@@ -103,7 +103,6 @@ export default {
           this.userName = currentUser.data().userName;
           this.accountName = currentUser.data().accountName;
         }
-        console.log(this.userName,this.accountName);
       } catch (error) {
         console.log(error);
       }
@@ -111,10 +110,7 @@ export default {
     async fetchPosts() {
       try {
         const post = await this.fetchPost(`posts/${this.postId}`);
-        console.log('post',post);
         const user = await this.fetchUser(post.userRef);
-        console.log('user',user);
-        
         const posts = {
           ...post,
           ...user
@@ -131,7 +127,6 @@ export default {
         const commentsRef = firebase.firestore().collection("comments").doc(this.postId);
         commentsRef.onSnapshot(async (querySnapshot) => {
           const commentsQuery = await querySnapshot.data().posts;
-          console.log('commentQuery',commentsQuery);
 
           let comments = [];
           let post = [];
@@ -143,7 +138,6 @@ export default {
             comments.push({ ...post, ...user });
           }
 
-          console.log('comments', comments);
           this.comments = comments;
         });
       } catch (error) {
