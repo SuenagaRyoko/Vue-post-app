@@ -76,65 +76,52 @@ export default {
   },
   methods: {
      async setUser() {
-      try {
-        const userRef = firebase.firestore().collection("users").doc(this.uid);
-        const currentUser = await userRef.get();
-        if (currentUser.exists) {
-          this.userName = currentUser.data().userName;
-          this.accountName = currentUser.data().accountName;
-        }
-        console.log(this.userName,this.accountName);
-      } catch (error) {
-        console.log(error);
+      const userRef = firebase.firestore().collection("users").doc(this.uid);
+      const currentUser = await userRef.get();
+      if (currentUser.exists) {
+        this.userName = currentUser.data().userName;
+        this.accountName = currentUser.data().accountName;
       }
+      console.log(this.userName,this.accountName);
     },
     async setCurrentPageUser() {
       const currentUserAccountName = this.$route.path.replace("/user/", "");
-      console.log(currentUserAccountName);
-      try {
-        const userRef = firebase.firestore().collection("users");
-        const currentPageUser = await userRef.where("accountName", "==", currentUserAccountName).get();
-        currentPageUser.forEach((user) => {
-          this.currentPageUser["uid"] = user.id;
-          this.currentPageUser["userName"] = user.data().userName;
-          this.currentPageUser["accountName"] = user.data().accountName;
-          this.currentPageUser["imageUrl"] = user.data().imageUrl;
-          this.fetchPosts();
-        });
-      } catch (error) {
-        console.log(error);
-      }
+      const userRef = firebase.firestore().collection("users");
+      const currentPageUser = await userRef.where("accountName", "==", currentUserAccountName).get();
+      currentPageUser.forEach((user) => {
+        this.currentPageUser["uid"] = user.id;
+        this.currentPageUser["userName"] = user.data().userName;
+        this.currentPageUser["accountName"] = user.data().accountName;
+        this.currentPageUser["imageUrl"] = user.data().imageUrl;
+        this.fetchPosts();
+      });
     },
     fetchPosts() {
-      try {
-        const postRef = firebase.firestore().collection("posts");
-        postRef
-          .where("userRef", "==", "users/" + this.currentPageUser.uid)
-          .orderBy("createdAt", "desc")
-          .onSnapshot( async (querySnapshot) => {
-            let posts = [];
-            const docs = querySnapshot.docs.map((doc) => {
-              return {
-                id: doc.id,
-                ...doc.data()
-              }
-            })
-
-            let user = [];
-            for (let i = 0; i < docs.length; i++) {
-              user = await this.fetchUser(docs[i].userRef);
-              posts.push({
-                ...docs[i],
-                ...user
-              });
+      const postRef = firebase.firestore().collection("posts");
+      postRef
+        .where("userRef", "==", "users/" + this.currentPageUser.uid)
+        .orderBy("createdAt", "desc")
+        .onSnapshot( async (querySnapshot) => {
+          let posts = [];
+          const docs = querySnapshot.docs.map((doc) => {
+            return {
+              id: doc.id,
+              ...doc.data()
             }
-            console.log('posts', posts);
-            
-            this.posts = posts;
-          });
-      } catch (error) {
-        console.log(error);
-      }
+          })
+
+          let user = [];
+          for (let i = 0; i < docs.length; i++) {
+            user = await this.fetchUser(docs[i].userRef);
+            posts.push({
+              ...docs[i],
+              ...user
+            });
+          }
+          console.log('posts', posts);
+          
+          this.posts = posts;
+        });
     },
     async fetchUser(ref) {
       const userRef = firebase.firestore().doc(ref);
@@ -146,25 +133,21 @@ export default {
       return data;
     },
     async sendPost(msg, postId) {
-      try {
-        const postRef = firebase.firestore().collection("posts");
-        const commentsRef = firebase.firestore().collection("comments");
-        const addComment = await postRef
-          .add({
-            msg,
-            userRef: `users/${this.uid}`,
-            parentPost: postId,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-        if (postId) {
-          commentsRef
-            .doc(postId)
-            .set({
-              posts: firebase.firestore.FieldValue.arrayUnion(`posts/${addComment.id}`)
-            }, { merge: true });
-        }
-      } catch (error) {
-        console.log(error);
+      const postRef = firebase.firestore().collection("posts");
+      const commentsRef = firebase.firestore().collection("comments");
+      const addComment = await postRef
+        .add({
+          msg,
+          userRef: `users/${this.uid}`,
+          parentPost: postId,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      if (postId) {
+        commentsRef
+          .doc(postId)
+          .set({
+            posts: firebase.firestore.FieldValue.arrayUnion(`posts/${addComment.id}`)
+          }, { merge: true });
       }
     },
   },

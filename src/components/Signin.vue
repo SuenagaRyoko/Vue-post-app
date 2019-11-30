@@ -43,16 +43,12 @@ export default {
   },
   methods: {
     async login() {
-      try {
-        const isLogin = await firebase
-          .auth()
-          .signInWithEmailAndPassword(this.email, this.password)
+      const isLogin = await firebase
+        .auth()
+        .signInWithEmailAndPassword(this.email, this.password)
 
-        if (isLogin) {
-          this.$router.push('/')
-        }
-      } catch (error) {
-        console.log(error);
+      if (isLogin) {
+        this.$router.push('/')
       }
     }
   }

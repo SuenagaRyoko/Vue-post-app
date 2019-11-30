@@ -96,54 +96,40 @@ export default {
   },
   methods: {
     async setUser() {
-      try {
-        const userRef = firebase.firestore().collection("users").doc(this.uid);
-        const currentUser = await userRef.get();
-        if (currentUser.exists) {
-          this.userName = currentUser.data().userName;
-          this.accountName = currentUser.data().accountName;
-        }
-      } catch (error) {
-        console.log(error);
+      const userRef = firebase.firestore().collection("users").doc(this.uid);
+      const currentUser = await userRef.get();
+      if (currentUser.exists) {
+        this.userName = currentUser.data().userName;
+        this.accountName = currentUser.data().accountName;
       }
     },
     async fetchPosts() {
-      try {
-        const post = await this.fetchPost(`posts/${this.postId}`);
-        const user = await this.fetchUser(post.userRef);
-        const posts = {
-          ...post,
-          ...user
-        };
-        console.log('posts',posts);
-        this.post = posts;
-      } catch (error) {
-        console.log(error);
-        
-      }
+      const post = await this.fetchPost(`posts/${this.postId}`);
+      const user = await this.fetchUser(post.userRef);
+      const posts = {
+        ...post,
+        ...user
+      };
+      console.log('posts',posts);
+      this.post = posts;
     },
     async fatchComments() {
-      try {
-        const commentsRef = firebase.firestore().collection("comments").doc(this.postId);
-        commentsRef.onSnapshot(async (querySnapshot) => {
-          const commentsQuery = await querySnapshot.data().posts;
+      const commentsRef = firebase.firestore().collection("comments").doc(this.postId);
+      commentsRef.onSnapshot(async (querySnapshot) => {
+        const commentsQuery = await querySnapshot.data().posts;
 
-          let comments = [];
-          let post = [];
-          let user = [];
+        let comments = [];
+        let post = [];
+        let user = [];
 
-          for (let i = 0; i < commentsQuery.length; i++) {
-            post = await this.fetchPost(commentsQuery[i]);
-            user = await this.fetchUser(post.userRef);
-            comments.push({ ...post, ...user });
-          }
+        for (let i = 0; i < commentsQuery.length; i++) {
+          post = await this.fetchPost(commentsQuery[i]);
+          user = await this.fetchUser(post.userRef);
+          comments.push({ ...post, ...user });
+        }
 
-          this.comments = comments;
-        });
-      } catch (error) {
-        console.log(error);
-        
-      }
+        this.comments = comments;
+      });
     },
     async fetchPost(ref) {
       const postRef = firebase.firestore().doc(ref);
@@ -164,25 +150,21 @@ export default {
       return data;
     },
     async sendPost(msg, postId) {
-      try {
-        const postRef = firebase.firestore().collection("posts");
-        const commentsRef = firebase.firestore().collection("comments");
-        const addComment = await postRef
-          .add({
-            msg,
-            userRef: `users/${this.uid}`,
-            parentPost: postId,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-        if (postId) {
-          commentsRef
-            .doc(postId)
-            .set({
-              posts: firebase.firestore.FieldValue.arrayUnion(`posts/${addComment.id}`)
-            }, { merge: true });
-        }
-      } catch (error) {
-        console.log(error);
+      const postRef = firebase.firestore().collection("posts");
+      const commentsRef = firebase.firestore().collection("comments");
+      const addComment = await postRef
+        .add({
+          msg,
+          userRef: `users/${this.uid}`,
+          parentPost: postId,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      if (postId) {
+        commentsRef
+          .doc(postId)
+          .set({
+            posts: firebase.firestore.FieldValue.arrayUnion(`posts/${addComment.id}`)
+          }, { merge: true });
       }
     },
     toggleDropdown() {
@@ -200,7 +182,7 @@ export default {
         .then(() => {
           this.$router.push("/");
         }).catch((error) => {
-          console.log(error);
+          console.log(error.message);
         });
     }
   },

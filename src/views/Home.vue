@@ -95,47 +95,38 @@ export default {
   },
   methods: {
      async setUser() {
-      try {
-        const userRef = firebase.firestore().collection("users").doc(this.uid);
-        const currentUser = await userRef.get();
-        if (currentUser.exists) {
-          this.userName = currentUser.data().userName;
-          this.accountName = currentUser.data().accountName;
-        }
-      } catch (error) {
-        console.log(error);
+      const userRef = firebase.firestore().collection("users").doc(this.uid);
+      const currentUser = await userRef.get();
+      if (currentUser.exists) {
+        this.userName = currentUser.data().userName;
+        this.accountName = currentUser.data().accountName;
       }
     },
     fetchPosts() {
-      try {
-        const postRef = firebase.firestore().collection("posts");
-        postRef
-          .where("parentPost", "==", null)
-          .orderBy("createdAt", "desc")
-          .onSnapshot( async (querySnapshot) => {
-            let posts = [];
-            const docs = await querySnapshot.docs.map((doc) => {
-              return {
-                id: doc.id,
-                ...doc.data()
-              }
-            })
-
-            let user = [];
-            for (let i = 0; i < docs.length; i++) {
-              user = await this.fetchUser(docs[i].userRef);
-              posts.push({
-                ...docs[i],
-                ...user
-              });
+      const postRef = firebase.firestore().collection("posts");
+      postRef
+        .where("parentPost", "==", null)
+        .orderBy("createdAt", "desc")
+        .onSnapshot( async (querySnapshot) => {
+          let posts = [];
+          const docs = await querySnapshot.docs.map((doc) => {
+            return {
+              id: doc.id,
+              ...doc.data()
             }
+          })
 
-            this.posts = posts;
-          });
-      } catch (error) {
-        console.log(error);
-        
-      }
+          let user = [];
+          for (let i = 0; i < docs.length; i++) {
+            user = await this.fetchUser(docs[i].userRef);
+            posts.push({
+              ...docs[i],
+              ...user
+            });
+          }
+
+          this.posts = posts;
+        });
     },
     async fetchUser(ref) {
       const userRef = firebase.firestore().doc(ref);
@@ -147,32 +138,28 @@ export default {
       return data;
     },
     async sendPost(msg, postId) {
-      try {
-        const postRef = firebase.firestore().collection("posts");
-        const commentsRef = firebase.firestore().collection("comments");
-        const addComment = await postRef
-          .add({
-            msg,
-            userRef: `users/${this.uid}`,
-            parentPost: postId,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-        if (postId) {
-          commentsRef
-            .doc(postId)
-            .set({
-              posts: firebase.firestore.FieldValue.arrayUnion(`posts/${addComment.id}`)
-            }, { merge: true });
-        }
-      } catch (error) {
-        console.log(error);
+      const postRef = firebase.firestore().collection("posts");
+      const commentsRef = firebase.firestore().collection("comments");
+      const addComment = await postRef
+        .add({
+          msg,
+          userRef: `users/${this.uid}`,
+          parentPost: postId,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      if (postId) {
+        commentsRef
+          .doc(postId)
+          .set({
+            posts: firebase.firestore.FieldValue.arrayUnion(`posts/${addComment.id}`)
+          }, { merge: true });
       }
     },
     signout() {
       firebase.auth().signOut().then(() => {
         this.uid = "";
       }).catch(function(error) {
-        console.log(error);
+         console.log(error.message);
       });
     },
     toggleNavbar() {
