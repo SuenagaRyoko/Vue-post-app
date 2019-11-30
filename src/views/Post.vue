@@ -82,17 +82,17 @@ export default {
     };
   },
   created() {
-    firebase.auth().onAuthStateChanged(user => {
-      if (!user) {
-        this.$router.push("/signin");
-      } else {
-        this.uid = user.uid;
-        this.postId = this.$route.path.replace("/post/", "");
-        this.setUser();
-        this.fetchPosts();
-        this.fatchComments();
-      }
-    });
+    // firebase.auth().onAuthStateChanged(user => {
+    //   if (!user) {
+    //     this.$router.push("/signin");
+    //   } else {
+    //     this.uid = user.uid;
+    //     this.postId = this.$route.path.replace("/post/", "");
+    //     this.setUser();
+    //     this.fetchPosts();
+    //     this.fatchComments();
+    //   }
+    // });
   },
   methods: {
     async setUser() {
@@ -104,32 +104,32 @@ export default {
       }
     },
     async fetchPosts() {
-      const post = await this.fetchPost(`posts/${this.postId}`);
-      const user = await this.fetchUser(post.userRef);
-      const posts = {
-        ...post,
-        ...user
-      };
-      console.log('posts',posts);
-      this.post = posts;
+      // const post = await this.fetchPost(`posts/${this.postId}`);
+      // const user = await this.fetchUser(post.userRef);
+      // const posts = {
+      //   ...post,
+      //   ...user
+      // };
+      // console.log('posts',posts);
+      // this.post = posts;
     },
     async fatchComments() {
-      const commentsRef = firebase.firestore().collection("comments").doc(this.postId);
-      commentsRef.onSnapshot(async (querySnapshot) => {
-        const commentsQuery = await querySnapshot.data().posts;
+      // const commentsRef = firebase.firestore().collection("comments").doc(this.postId);
+      // commentsRef.onSnapshot(async (querySnapshot) => {
+      //   const commentsQuery = await querySnapshot.data().posts;
 
-        let comments = [];
-        let post = [];
-        let user = [];
+      //   let comments = [];
+      //   let post = [];
+      //   let user = [];
 
-        for (let i = 0; i < commentsQuery.length; i++) {
-          post = await this.fetchPost(commentsQuery[i]);
-          user = await this.fetchUser(post.userRef);
-          comments.push({ ...post, ...user });
-        }
+      //   for (let i = 0; i < commentsQuery.length; i++) {
+      //     post = await this.fetchPost(commentsQuery[i]);
+      //     user = await this.fetchUser(post.userRef);
+      //     comments.push({ ...post, ...user });
+      //   }
 
-        this.comments = comments;
-      });
+      //   this.comments = comments;
+      // });
     },
     async fetchPost(ref) {
       const postRef = firebase.firestore().doc(ref);
@@ -150,22 +150,22 @@ export default {
       return data;
     },
     async sendPost(msg, postId) {
-      const postRef = firebase.firestore().collection("posts");
-      const commentsRef = firebase.firestore().collection("comments");
-      const addComment = await postRef
-        .add({
-          msg,
-          userRef: `users/${this.uid}`,
-          parentPost: postId,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      if (postId) {
-        commentsRef
-          .doc(postId)
-          .set({
-            posts: firebase.firestore.FieldValue.arrayUnion(`posts/${addComment.id}`)
-          }, { merge: true });
-      }
+      // const postRef = firebase.firestore().collection("posts");
+      // const commentsRef = firebase.firestore().collection("comments");
+      // const addComment = await postRef
+      //   .add({
+      //     msg,
+      //     userRef: `users/${this.uid}`,
+      //     parentPost: postId,
+      //     createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      //   });
+      // if (postId) {
+      //   commentsRef
+      //     .doc(postId)
+      //     .set({
+      //       posts: firebase.firestore.FieldValue.arrayUnion(`posts/${addComment.id}`)
+      //     }, { merge: true });
+      // }
     },
     toggleDropdown() {
       if (this.isOpen) {

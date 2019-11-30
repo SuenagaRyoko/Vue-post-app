@@ -97,31 +97,31 @@ export default {
       });
     },
     fetchPosts() {
-      const postRef = firebase.firestore().collection("posts");
-      postRef
-        .where("userRef", "==", "users/" + this.currentPageUser.uid)
-        .orderBy("createdAt", "desc")
-        .onSnapshot( async (querySnapshot) => {
-          let posts = [];
-          const docs = querySnapshot.docs.map((doc) => {
-            return {
-              id: doc.id,
-              ...doc.data()
-            }
-          })
+      // const postRef = firebase.firestore().collection("posts");
+      // postRef
+      //   .where("userRef", "==", "users/" + this.currentPageUser.uid)
+      //   .orderBy("createdAt", "desc")
+      //   .onSnapshot( async (querySnapshot) => {
+      //     let posts = [];
+      //     const docs = querySnapshot.docs.map((doc) => {
+      //       return {
+      //         id: doc.id,
+      //         ...doc.data()
+      //       }
+      //     })
 
-          let user = [];
-          for (let i = 0; i < docs.length; i++) {
-            user = await this.fetchUser(docs[i].userRef);
-            posts.push({
-              ...docs[i],
-              ...user
-            });
-          }
-          console.log('posts', posts);
+      //     let user = [];
+      //     for (let i = 0; i < docs.length; i++) {
+      //       user = await this.fetchUser(docs[i].userRef);
+      //       posts.push({
+      //         ...docs[i],
+      //         ...user
+      //       });
+      //     }
+      //     console.log('posts', posts);
           
-          this.posts = posts;
-        });
+      //     this.posts = posts;
+      //   });
     },
     async fetchUser(ref) {
       const userRef = firebase.firestore().doc(ref);
